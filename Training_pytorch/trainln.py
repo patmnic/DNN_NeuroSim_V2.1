@@ -4,10 +4,10 @@ import time
 from utee import misc
 import torch
 import torch.optim as optim
-from torch.autograd import Variable, detect_anomaly
+from torch.autograd import Variable
 from utee import make_path
 from cifar import dataset
-from cifar import model as Model
+#from cifar import model as Model
 from utee import wage_util
 from datetime import datetime
 from utee import wage_quantizer
@@ -17,15 +17,45 @@ import csv
 from subprocess import call
 from modules.quantization_cpu_np_infer import QConv2d,QLinear
 import tempfile
+import torch.nn as nn
+import torch.nn.functional as F
+
+# LeNet-5 Starts
+class LeNet5(nn.Module):
+    def __init__(self):
+        super(LeNet5, self).__init__()
+        self.conv1 = nn.Conv2d(3, 6, kernel_size=5)
+        self.conv2 = nn.Conv2d(6, 16, kernel_size=5)
+        self.fc1 = nn.Linear(16 * 5 * 5, 120)
+        self.fc2 = nn.Linear(120, 84)
+        self.fc3 = nn.Linear(84, 10)
+
+    def forward(self, x):
+        x = F.relu(F.max_pool2d(self.conv1(x), 2))
+        x = F.relu(F.max_pool2d(self.conv2(x), 2))
+        x = x.view(-1, 16 * 5 * 5)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
+
+class Model(nn.Module):
+    def __init__(self, args=None, logger=None):
+        super(Model, self).__init__()
+        self.features = LeNet5()
+
+    def forward(self, x):
+        return self.features(x)
+# LeNet-5 Ends    
 
 def main():
     parser = argparse.ArgumentParser(description='PyTorch CIFAR-X Example')
     parser.add_argument('--type', default='cifar10', help='dataset for training')
     parser.add_argument('--batch_size', type=int, default=200, help='input batch size for training (default: 200)')
-    parser.add_argument('--epochs', type=int, default=3, help='number of epochs to train (default: 32)')
+    parser.add_argument('--epochs', type=int, default=32, help='number of epochs to train (default: 32)')
     parser.add_argument('--grad_scale', type=float, default=1, help='learning rate for wage delta calculation')
     parser.add_argument('--seed', type=int, default=117, help='random seed (default: 117)')
-    parser.add_argument('--log_interval', type=int, default=10,  help='how many batches to wait before logging training status default = 100')
+    parser.add_argument('--log_interval', type=int, default=100,  help='how many batches to wait before logging training status default = 100')
     parser.add_argument('--test_interval', type=int, default=1,  help='how many epochs to wait before another test (default = 1)')
     parser.add_argument('--logdir', default='log/default', help='folder to save to the log')
     parser.add_argument('--decreasing_lr', default='200,250', help='decreasing strategy')
@@ -51,9 +81,9 @@ def main():
     current_time = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
 
     args = parser.parse_args()
-    args.wl_weight = 5            # weight precision
-    args.wl_grad = 5              # gradient precision
-    args.cellBit = 5              # cell precision (in V2.0, we only support one-cell-per-synapse, i.e. cellBit==wl_weight==wl_grad)
+    args.wl_weight = 2            # weight precision
+    args.wl_grad = 2              # gradient precision
+    args.cellBit = 2              # cell precision (in V2.0, we only support one-cell-per-synapse, i.e. cellBit==wl_weight==wl_grad)
     args.max_level = 32           # Maximum number of conductance states during weight update (floor(log2(max_level))=cellBit) 
     args.c2cVari = 0.003          # cycle-to-cycle variation
     args.d2dVari = 0.0            # device-to-device variation
@@ -66,10 +96,10 @@ def main():
 
 
     NeuroSim_Out = np.array([["L_forward (s)", "L_activation gradient (s)", "L_weight gradient (s)", "L_weight update (s)", 
-                              "E_forward (J)", "E_activation gradient (J)", "E_weight gradient (J)", "E_weight update (J)",
-                              "L_forward_Peak (s)", "L_activation gradient_Peak (s)", "L_weight gradient_Peak (s)", "L_weight update_Peak (s)", 
-                              "E_forward_Peak (J)", "E_activation gradient_Peak (J)", "E_weight gradient_Peak (J)", "E_weight update_Peak (J)",
-                              "TOPS/W", "TOPS", "Peak TOPS/W", "Peak TOPS"]])
+                            "E_forward (J)", "E_activation gradient (J)", "E_weight gradient (J)", "E_weight update (J)",
+                            "L_forward_Peak (s)", "L_activation gradient_Peak (s)", "L_weight gradient_Peak (s)", "L_weight update_Peak (s)", 
+                            "E_forward_Peak (J)", "E_activation gradient_Peak (J)", "E_weight gradient_Peak (J)", "E_weight update_Peak (J)",
+                            "TOPS/W", "TOPS", "Peak TOPS/W", "Peak TOPS"]])
     np.savetxt("NeuroSim_Output.csv", NeuroSim_Out, delimiter=",",fmt='%s')
     if not os.path.exists('./NeuroSim_Results_Each_Epoch'):
         os.makedirs('./NeuroSim_Results_Each_Epoch')
@@ -107,7 +137,7 @@ def main():
     # data loader and model
     assert args.type in ['cifar10', 'cifar100'], args.type
     train_loader, test_loader = dataset.get10(batch_size=args.batch_size, num_workers=1, data_root=os.path.join(tempfile.gettempdir(), os.path.join('public_dataset','pytorch')))
-    model = Model.cifar10(args = args, logger=logger)
+    model = Model(args = args, logger=logger)
     if args.cuda:
         model.cuda()
 
@@ -145,7 +175,7 @@ def main():
                 i=i+1
             
             if epoch in decreasing_lr:
-                 grad_scale = grad_scale / 8.0
+                grad_scale = grad_scale / 8.0
 
             logger("training phase")
             for batch_idx, (data, target) in enumerate(train_loader):
@@ -162,6 +192,7 @@ def main():
                 j=0
                 for name, param in list(model.named_parameters())[::-1]:
                     velocity[j] = gamma * velocity[j] + alpha * param.grad.data
+                    temp = velocity
                     param.grad.data = velocity[j]
                     param.grad.data = wage_quantizer.QG(param.data,args.wl_weight,param.grad.data,args.wl_grad,grad_scale,
                                 torch.from_numpy(paramALTP[j]).cuda(), torch.from_numpy(paramALTD[j]).cuda(), args.max_level, args.max_level)
@@ -200,7 +231,7 @@ def main():
             w_mean = np.array([])
             oldWeight = {}
             k = 0
-           
+        
             for name, param in list(model.named_parameters()):
                 oldWeight[k] = param.data + param.grad.data
                 k = k+1
@@ -225,11 +256,11 @@ def main():
                     weight_file_name =  './layer_record/weightOld' + str(layer.name) + '.csv'
                     hook.write_matrix_weight( (oldWeight[h]).cpu().data.numpy(),weight_file_name)
                     h = h+1
-            for i, layer in enumerate(model.classifier.modules()):
-                if isinstance(layer, QLinear):
-                    weight_file_name =  './layer_record/weightOld' + str(layer.name) + '.csv'
-                    hook.write_matrix_weight( (oldWeight[h]).cpu().data.numpy(),weight_file_name)
-                    h = h+1
+#            for i, layer in enumerate(model.classifier.modules()):
+#                if isinstance(layer, QLinear):
+#                    weight_file_name =  './layer_record/weightOld' + str(layer.name) + '.csv'
+#                    hook.write_matrix_weight( (oldWeight[h]).cpu().data.numpy(),weight_file_name)
+#                    h = h+1
             
             if epoch % args.test_interval == 0:
                 model.eval()

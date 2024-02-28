@@ -56,7 +56,8 @@ def QE(x, bits):
 
 def QG(origin, bits_W, x, bits_G, lr, paramALTP, paramALTD, maxLevelLTP, maxLevelLTD):
     max_entry = x.abs().max()
-    assert max_entry != 0, "QG blow"
+    if max_entry == 0:
+        max_entry = max_entry+1e-9
     #if max_entry != 0:
     x /= shift(max_entry)
     gradient = lr * x

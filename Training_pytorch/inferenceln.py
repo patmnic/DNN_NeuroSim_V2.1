@@ -9,11 +9,41 @@ import torch.optim as optim
 from torch.autograd import Variable
 from utee import make_path
 from cifar import dataset
-from cifar import model
+#from cifar import model
 from utee import hook
 #from IPython import embed
 from datetime import datetime
 from subprocess import call
+import torch.nn as nn
+import torch.nn.functional as F
+
+# LeNet-5 Starts
+class LeNet5(nn.Module):
+    def __init__(self):
+        super(LeNet5, self).__init__()
+        self.conv1 = nn.Conv2d(3, 6, kernel_size=5)
+        self.conv2 = nn.Conv2d(6, 16, kernel_size=5)
+        self.fc1 = nn.Linear(16 * 5 * 5, 120)
+        self.fc2 = nn.Linear(120, 84)
+        self.fc3 = nn.Linear(84, 10)
+
+    def forward(self, x):
+        x = F.relu(F.max_pool2d(self.conv1(x), 2))
+        x = F.relu(F.max_pool2d(self.conv2(x), 2))
+        x = x.view(-1, 16 * 5 * 5)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
+
+class Model(nn.Module):
+    def __init__(self, args=None, logger=None):
+        super(Model, self).__init__()
+        self.features = LeNet5()
+
+    def forward(self, x):
+        return self.features(x)
+# LeNet-5 Ends  
 
 def main():
     parser = argparse.ArgumentParser(description='PyTorch CIFAR-X Example')
@@ -78,12 +108,13 @@ def main():
     if args.cuda:
         torch.cuda.manual_seed(args.seed)
 
-    model_path = './models/baseline.pth'
+    model_path = './models/lenet-2bits.pth'
 
     # data loader and model
     assert args.type in ['cifar10', 'cifar100'], args.type
     train_loader, test_loader = dataset.get10(batch_size=args.batch_size, num_workers=1)
-    modelCF = model.cifar10(args = args, logger=logger, pretrained = model_path)
+    modelCF = Model(args = args, logger=logger)
+    modelCF.load_state_dict(torch.load(model_path))
     print(args.cuda)
     if args.cuda:
         modelCF.cuda()

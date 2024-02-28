@@ -118,9 +118,9 @@ def hardware_evaluation(model,wl_weight,wl_activation,numEpoch):
     for i, layer in enumerate(model.features.modules()):
         if isinstance(layer, QConv2d) or isinstance(layer,QLinear):
             hook_handle_list.append(layer.register_forward_hook(Neural_Sim))
-    for i, layer in enumerate(model.classifier.modules()):
-        if isinstance(layer, QLinear):
-            hook_handle_list.append(layer.register_forward_hook(Neural_Sim))
+#    for i, layer in enumerate(model.classifier.modules()):
+#        if isinstance(layer, QLinear):
+#            hook_handle_list.append(layer.register_forward_hook(Neural_Sim))
     return hook_handle_list
 
 

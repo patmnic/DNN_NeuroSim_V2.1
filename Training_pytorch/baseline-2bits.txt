@@ -1,0 +1,40 @@
+C:\Users\mpatr\OneDrive\Documents\GitHub\DNN_NeuroSim_V2.1\Training_pytorch\log/default\ADCprecision=5\batch_size=200\c2cVari=0.003\cellBit=5\d2dVari=0.0\decreasing_lr=200,250\detect=0\grad_scale=1\inference=0\max_level=32\nonlinearityLTD=1.46\nonlinearityLTP=1.75\onoffratio=10\seed=117\subArray=128\t=0\target=0\type=cifar10\v=0\vari=0\wl_activate=8\wl_error=8\wl_grad=5\wl_weight=5
+Building CIFAR-10 data loader with 1 workers
+Files already downloaded and verified
+Files already downloaded and verified
+fan_in     27, float_limit 0.333333, quant limit 1.5, scale 4
+fan_in   1152, float_limit 0.051031, quant limit 1.5, scale 32
+fan_in   1152, float_limit 0.051031, quant limit 1.5, scale 32
+fan_in   2304, float_limit 0.036084, quant limit 1.5, scale 32
+fan_in   2304, float_limit 0.036084, quant limit 1.5, scale 32
+fan_in   4608, float_limit 0.025516, quant limit 1.5, scale 64
+fan_in   8192, float_limit 0.019137, quant limit 1.5, scale 64
+fan_in   1024, float_limit 0.054127, quant limit 1.5, scale 32
+weight distribution
+[-0.00474933  0.0010212   0.00365072 -0.00243197  0.00377017 -0.01653726
+ -0.04239926 -0.01951133  0.49590835  0.62860376  0.66286433  0.66798913
+  0.64740169  0.65486729  0.70144904  0.65815872]
+delta distribution
+[-4.06901026e-03  1.33090548e-03 -7.39627430e-05  1.68906321e-04
+ -4.79486262e-05  1.41991506e-04  4.33698297e-05 -1.52587891e-04
+  2.84192096e-02  1.79400221e-02  8.79253354e-03  1.31281521e-02
+  1.31481756e-02  1.46948118e-02  5.21721039e-03  7.68832210e-03]
+weight distribution
+[-0.00740675 -0.01113235  0.00961962 -0.00279602  0.00204992 -0.02797672
+ -0.04544511 -0.01818119  0.45596981  0.58091545  0.61811966  0.62417275
+  0.61233836  0.62429178  0.69520098  0.65524846]
+delta distribution
+[-4.70196770e-04 -7.07838262e-05  1.97092697e-04  3.83271108e-04
+ -1.79078852e-04 -5.18163033e-05 -3.49655747e-05  1.52587891e-04
+  2.53815930e-02  1.82632096e-02  1.80036686e-02  1.81813110e-02
+  1.58083420e-02  1.30847907e-02  5.77300275e-03  7.63853919e-03]
+weight distribution
+[-2.10364051e-02 -1.80453248e-02  7.34521868e-03 -1.23375524e-02
+ -8.70690128e-05 -3.28114592e-02 -4.64892983e-02 -1.53276073e-02
+  4.53737468e-01  5.54662704e-01  5.86524367e-01  5.96782148e-01
+  5.85902393e-01  6.05409741e-01  6.90543175e-01  6.53907597e-01]
+delta distribution
+[-3.07436334e-04  6.17133279e-04  4.99725342e-04  1.37339695e-03
+  2.65969167e-04  3.12884658e-04  1.37686729e-05 -3.05175781e-05
+  3.18798050e-02  1.80258211e-02  1.41906161e-02  1.95746534e-02
+  1.32408235e-02  1.05068665e-02  6.91792555e-03  8.21740832e-03]

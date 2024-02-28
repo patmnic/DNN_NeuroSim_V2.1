@@ -1,0 +1,13 @@
+C:\Users\mpatr\OneDrive\Documents\GitHub\DNN_NeuroSim_V2.1\Training_pytorch\log/default\ADCprecision=6\batch_size=1024\cellBit=4\decreasing_lr=200,250\detect=1\grad_scale=8\inference=1\onoffratio=10\seed=117\subArray=128\t=0\target=0.5\type=cifar10\v=0\vari=0\wl_activate=8\wl_error=8\wl_grad=8\wl_weight=8
+Building CIFAR-10 data loader with 1 workers
+Files already downloaded and verified
+Files already downloaded and verified
+fan_in     27, float_limit 0.333333, quant limit 0.3333333333333333, scale 1.0
+fan_in   1152, float_limit 0.051031, quant limit 0.1875, scale 4
+fan_in   1152, float_limit 0.051031, quant limit 0.1875, scale 4
+fan_in   2304, float_limit 0.036084, quant limit 0.1875, scale 4
+fan_in   2304, float_limit 0.036084, quant limit 0.1875, scale 4
+fan_in   4608, float_limit 0.025516, quant limit 0.1875, scale 8
+fan_in   8192, float_limit 0.019137, quant limit 0.1875, scale 8
+fan_in   1024, float_limit 0.054127, quant limit 0.1875, scale 4
+True
